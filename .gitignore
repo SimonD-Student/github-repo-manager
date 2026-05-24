@@ -1,0 +1,9 @@
+# Dépendances
+node_modules/
+
+# Variables d'environnement (Sécurité)
+.env
+
+# Fichiers de build
+dist/
+build/
