@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import { connectDB } from '../db/mongoDB.js';
-import { User } from '../models/User.js';
+import { User } from '../models/user.model.js';
 
 dotenv.config();
 
