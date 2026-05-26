@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './db/mongoDB.js';
 import authRoutes from './routes/auth.routes.js';
+import courseRoutes from './routes/courses.routes.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 
 // === ROUTES ===
 app.use('/api/auth', authRoutes);
+app.use('/api/courses', courseRoutes);
 
 // === LANCEMENT DU SERVEUR ===
 const startServer = async () => {

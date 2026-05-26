@@ -1,4 +1,4 @@
-// src/pages/Login/index.tsx
+// src/pages/Login/CourseCard.tsx
 import { LoginCard } from '../../components/auth/LoginCard';
 import styles from './LoginPage.module.css';
 

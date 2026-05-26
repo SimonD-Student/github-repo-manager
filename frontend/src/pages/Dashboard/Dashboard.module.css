@@ -1,0 +1,61 @@
+.pageContainer {
+    min-height: 100vh;
+    background-color: #ffffff;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.mainContent {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2.5rem;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem 0;
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.newCourseBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #0a0a0a;
+    color: #ffffff;
+    border: none;
+    padding: 0.625rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.newCourseBtn:hover {
+    background-color: #262626;
+}
+
+.newCourseBtn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.coursesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
