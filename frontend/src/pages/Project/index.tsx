@@ -1,119 +1,77 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ProjectHeader } from '../../components/project/ProjectHeader/ProjectHeader';
+import { ConfigurationCard, type ProjectConfigData } from '../../components/project/ConfigurationCard/ConfigurationCard';
+import { UrlCard } from '../../components/project/UrlCard/UrlCard';
+import {getCourseByIdAPI, updateCourseConfigAPI} from '../../api/course.api';
 import styles from './Project.module.css';
 
-export const CourseDetails = () => {
-    const { courseId } = useParams(); // Récupère l'ID depuis l'URL
+export const Project = () => {
+    const { courseId } = useParams();
     const navigate = useNavigate();
 
-    // État local temporaire pour le formulaire
-    const [formData, setFormData] = useState({
+    // État pour les données du cours (titre, etc.)
+    const [courseInfo, setCourseInfo] = useState<{ title: string } | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // État local pour le formulaire, passé à ConfigurationCard
+    const [formData, setFormData] = useState<ProjectConfigData>({
         githubOrganization: '',
         minContributors: 2,
         maxContributors: 4,
         repoNameFormat: 'Groupe{XX}'
     });
 
+    // Charger les infos du cours au démarrage pour le titre du Header
+    useEffect(() => {
+        const fetchCourse = async () => {
+            if (!courseId) return;
+            try {
+                const data = await getCourseByIdAPI(courseId);
+                setCourseInfo(data);
+
+                // Si la BDD contient déjà une config, on pré-remplit le formulaire ici :
+                setFormData({
+                    githubOrganization: data.githubOrganization || '',
+                    minContributors: data.minContributors || 2,
+                    maxContributors: data.maxContributors || 4,
+                    repoNameFormat: data.repoNameFormat || 'Groupe{XX}'
+                });
+            } catch (error) {
+                console.error("Erreur lors de la récupération du cours", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCourse();
+    }, [courseId]);
+
+    const handleSave = async () => {
+        if (!courseId) return;
+        try {
+            await updateCourseConfigAPI(courseId, formData);
+            alert("Configuration sauvegardée avec succès !"); // On met une simple alerte pour l'instant
+        } catch (error) {
+            console.error("Erreur lors de la sauvegarde", error);
+            alert("Erreur lors de la sauvegarde");
+        }
+    };
+
     return (
         <div className={styles.pageContainer}>
-            {/* Top Bar */}
-            <div className={styles.topBar}>
-                <button className={styles.backBtn} onClick={() => navigate('/dashboard')}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    Retour
-                </button>
-                <div className={styles.courseInfo}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-                    </svg>
-                    <h1 className={styles.courseTitle}>Mobile Dev</h1> {/* Titre en dur pour l'instant */}
-                </div>
-            </div>
+            <ProjectHeader courseTitle={courseInfo?.title} isLoading={isLoading} />
 
             <div className={styles.mainContent}>
-                {/* Carte Configuration */}
-                <div className={styles.card}>
-                    <div className={styles.cardHeader}>
-                        <h2 className={styles.cardTitle}>Configuration Repository</h2>
-                        <p className={styles.cardSubtitle}>Configurez les paramètres pour la création automatique des repositories GitHub</p>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Organisation GitHub *</label>
-                        <input
-                            type="text"
-                            className={styles.input}
-                            placeholder="ex: universite-web1"
-                            value={formData.githubOrganization}
-                            onChange={(e) => setFormData({...formData, githubOrganization: e.target.value})}
-                        />
-                        <span className={styles.helperText}>L'organisation GitHub où seront créés les repositories des groupes</span>
-                    </div>
-
-                    <div className={styles.formRow}>
-                        <div>
-                            <label className={styles.label}>Nombre minimum de contributeurs</label>
-                            <select
-                                className={styles.select}
-                                value={formData.minContributors}
-                                onChange={(e) => setFormData({...formData, minContributors: Number(e.target.value)})}
-                            >
-                                {[1, 2, 3, 4, 5].map(num => (
-                                    <option key={`min-${num}`} value={num}>{num}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className={styles.label}>Nombre maximum de contributeurs</label>
-                            <select
-                                className={styles.select}
-                                value={formData.maxContributors}
-                                onChange={(e) => setFormData({...formData, maxContributors: Number(e.target.value)})}
-                            >
-                                {[2, 3, 4, 5, 6, 7, 8].map(num => (
-                                    <option key={`max-${num}`} value={num}>{num}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className={styles.formGroup} style={{ marginBottom: 0 }}>
-                        <label className={styles.label}>Format de nom de repository *</label>
-                        <input
-                            type="text"
-                            className={styles.input}
-                            value={formData.repoNameFormat}
-                            onChange={(e) => setFormData({...formData, repoNameFormat: e.target.value})}
-                        />
-                        <span className={styles.helperText}>Utilisez {'{XX}'} pour le numéro de groupe (sera remplacé par 01, 02, etc.)</span>
-                    </div>
-                </div>
-
-                {/* Carte URL de Participation */}
-                <div className={styles.card}>
-                    <div className={styles.cardHeader}>
-                        <h2 className={styles.cardTitle}>URL de Participation</h2>
-                        <p className={styles.cardSubtitle}>Générez une URL que les étudiants utiliseront pour s'inscrire et créer leurs groupes</p>
-                    </div>
-                    <button className={styles.generateUrlBtn}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                            <polyline points="15 3 21 3 21 9"></polyline>
-                            <line x1="10" y1="14" x2="21" y2="3"></line>
-                        </svg>
-                        Générer URL de Participation
-                    </button>
-                </div>
+                <ConfigurationCard data={formData} onChange={setFormData} />
+                <UrlCard />
 
                 {/* Footer Actions */}
                 <div className={styles.actionFooter}>
                     <button className={styles.cancelBtn} onClick={() => navigate('/dashboard')}>
                         Annuler
                     </button>
-                    <button className={styles.saveBtn}>
+                    <button className={styles.saveBtn} onClick={handleSave}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px' }}>
                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                             <polyline points="17 21 17 13 7 13 7 21"></polyline>

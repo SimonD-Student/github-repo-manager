@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createCourse, getCourses } from '../controllers/course.controller.js';
+import {createCourse, getCourseById, getCourses, updateCourseConfig} from '../controllers/course.controller.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 
 const router = Router();
@@ -9,5 +9,7 @@ router.use(requireAuth);
 
 router.post('/', createCourse);
 router.get('/', getCourses);
+router.get('/:id', getCourseById);
+router.put('/:id', updateCourseConfig);
 
 export default router;

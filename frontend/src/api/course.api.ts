@@ -15,8 +15,22 @@ export const getCoursesAPI = async () => {
     return response.data;
 };
 
+export const getCourseByIdAPI = async (id: string) => {
+    const response = await axios.get(`${API_URL}/courses/${id}`, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
 export const createCourseAPI = async (title: string, description: string) => {
     const response = await axios.post(`${API_URL}/courses`, { title, description }, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
+export const updateCourseConfigAPI = async (id: string, configData: any) => {
+    const response = await axios.put(`${API_URL}/courses/${id}`, configData, {
         headers: getAuthHeader()
     });
     return response.data;
