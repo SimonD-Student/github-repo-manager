@@ -1,0 +1,13 @@
+# Dépendances
+node_modules/
+
+# Fichiers compilés TypeScript
+dist/
+build/
+
+# Variables d'environnement (Crucial pour la sécurité !)
+.env
+
+# Logs
+npm-debug.log*
+yarn-error.log*

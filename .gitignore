@@ -1,9 +1,6 @@
-# Dépendances
-node_modules/
+# Configuration WebStorm / IntelliJ
+.idea/
 
-# Variables d'environnement (Sécurité)
-.env
-
-# Fichiers de build
-dist/
-build/
+# Fichiers système
+.DS_Store
+Thumbs.db
