@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getPublicCourseAPI } from '../../api/course.api';
+import { getPublicCourseAPI, joinCourseAPI } from '../../api/course.api';
 // Créez un fichier Join.module.css avec les styles inspirés de vos captures
 import styles from './Join.module.css';
 
@@ -14,6 +14,8 @@ export const Join = () => {
     const [course, setCourse] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [successData, setSuccessData] = useState<any>(null); // Pour stocker le résultat final
 
     // On initialise avec un participant vide
     const [participants, setParticipants] = useState<Participant[]>([{ fullName: '', githubId: '' }]);
@@ -47,9 +49,48 @@ export const Join = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // C'est ici que nous appellerons le backend pour créer le groupe sur GitHub !
-        console.log("Données soumises :", participants);
+        if (!token) return;
+
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            const result = await joinCourseAPI(token, participants);
+            setSuccessData(result); // On stocke la réponse (repoUrl, etc.)
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Une erreur est survenue lors de la création.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    if (successData) {
+        return (
+            <div className={styles.pageContainer} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className={styles.card} style={{ textAlign: 'center', maxWidth: '500px' }}>
+                    <h2 style={{ color: '#10b981', justifyContent: 'center' }}>🎉 Inscription réussie !</h2>
+                    <p style={{ margin: '1rem 0' }}>Votre groupe <strong>{successData.repoName}</strong> a bien été créé.</p>
+
+                    {successData.failedInvites?.length > 0 && (
+                        <div className={styles.warningMessage} style={{ marginBottom: '1rem', textAlign: 'left' }}>
+                            Attention : Les identifiants GitHub suivants n'ont pas pu être invités (pseudos incorrects) :
+                            <strong> {successData.failedInvites.join(', ')}</strong>
+                        </div>
+                    )}
+
+                    <a
+                        href={successData.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.submitBtn}
+                        style={{ display: 'inline-flex', textDecoration: 'none' }}
+                    >
+                        Accéder au Repository sur GitHub
+                    </a>
+                </div>
+            </div>
+        );
+    }
 
     if (isLoading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>;
     if (error) return <div style={{ padding: '2rem', color: 'red', textAlign: 'center' }}>{error}</div>;
@@ -138,8 +179,8 @@ export const Join = () => {
                         )}
 
                         <div className={styles.submitContainer}>
-                            <button type="submit" disabled={!isValid} className={styles.submitBtn}>
-                                Créer le Groupe et Repository
+                            <button type="submit" disabled={!isValid || isSubmitting} className={styles.submitBtn}>
+                                {isSubmitting ? 'Création en cours...' : 'Créer le Groupe et Repository'}
                             </button>
                         </div>
                     </form>

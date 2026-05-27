@@ -50,3 +50,9 @@ export const getPublicCourseAPI = async (token: string) => {
     const response = await axios.get(`${API_URL}/public/course/${token}`);
     return response.data;
 };
+
+// On ajoute l'appel POST public (sans header d'authentification personnel)
+export const joinCourseAPI = async (token: string, participants: any[]) => {
+    const response = await axios.post(`${API_URL}/public/course/${token}/join`, { participants });
+    return response.data;
+};

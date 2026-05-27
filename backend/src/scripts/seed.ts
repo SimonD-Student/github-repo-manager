@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
-import { connectDB } from '../db/mongoDB.js';
+import { connectDB } from '../db/mongoDB.js'; // Ajustez le chemin si besoin
 import { User } from '../models/user.model.js';
+import { encrypt } from '../utils/crypto.util.js';
 
 dotenv.config();
 
@@ -11,36 +12,37 @@ const seedAdmin = async () => {
 
     const email = process.env.USER_EMAIL;
     const password = process.env.USER_PASSWORD;
+    const githubToken = process.env.GITHUB_PAT;
 
-    if (!email || !password) {
-        console.error('❌ ADMIN_EMAIL ou ADMIN_PASSWORD manquant dans le .env');
+    if (!email || !password || !githubToken) {
+        console.error('❌ Variables manquantes dans le .env');
         process.exit(1);
     }
 
     try {
-        // Vérifier si l'utilisateur existe déjà
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            console.log(`⚠️ L'utilisateur ${email} existe déjà dans la base.`);
+            console.log(`⚠️ L'utilisateur existe déjà.`);
             process.exit(0);
         }
 
-        // Hachage du mot de passe (Coût de 10)
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        // Création de l'utilisateur
+        // On chiffre le token GitHub avant de le sauver
+        const githubTokenEncrypted = encrypt(githubToken);
+
         await User.create({
             email,
-            passwordHash
+            passwordHash,
+            githubTokenEncrypted
         });
 
-        console.log(`✅ Administrateur ${email} créé avec succès !`);
+        console.log(`✅ Administrateur créé avec succès avec son Token chiffré !`);
     } catch (error) {
-        console.error('❌ Erreur lors de la création:', error);
+        console.error('❌ Erreur:', error);
     } finally {
         await mongoose.disconnect();
-        console.log('🔌 Déconnecté de MongoDB');
         process.exit(0);
     }
 };

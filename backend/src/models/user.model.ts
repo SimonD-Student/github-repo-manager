@@ -4,7 +4,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IUser extends Document {
     email: string;
     passwordHash: string;
-    githubToken?: string; // Optionnel, on le remplira plus tard via l'application
+    githubTokenEncrypted: string;
 }
 
 const userSchema = new Schema<IUser>({
@@ -19,7 +19,7 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true
     },
-    githubToken: {
+    githubTokenEncrypted: {
         type: String,
         default: null
     }

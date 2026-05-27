@@ -10,7 +10,8 @@ const courseSchema = new mongoose.Schema({
     minContributors: { type: Number, default: 2 },
     maxContributors: { type: Number, default: 4 },
     repoNameFormat: { type: String, default: 'Groupe{XX}' },
-    participationUrl: { type: String, default: '' } // Sera générée plus tard
+    participationUrl: { type: String, default: '' }, // Sera générée plus tard
+    currentGroupCount: { type: Number, default: 0 }
 }, {
     timestamps: true
 });
