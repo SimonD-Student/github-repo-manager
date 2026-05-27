@@ -45,3 +45,37 @@
     width: 16px;
     height: 16px;
 }
+
+/* ... (gardez vos styles existants et ajoutez ceci) ... */
+
+.urlContainer {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.urlInput {
+    flex-grow: 1;
+    padding: 0.625rem 1rem;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: #374151;
+    outline: none;
+}
+
+.copyBtn {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    padding: 0 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.copyBtn:hover {
+    background-color: #f9fafb;
+}

@@ -1,5 +1,11 @@
 import type { Response } from 'express';
-import {addCourse, getCourse, getUserCourses, updateCourseConfiguration} from '../services/course.service.js';
+import {
+    addCourse,
+    generateParticipationToken,
+    getCourse,
+    getUserCourses,
+    updateCourseConfiguration
+} from '../services/course.service.js';
 import type { AuthRequest } from '../middlewares/auth.middleware.js'; // L'interface qu'on a créée
 
 export const createCourse = async (req: AuthRequest, res: Response): Promise<any> => {
@@ -68,6 +74,21 @@ export const updateCourseConfig = async (req: AuthRequest, res: Response): Promi
 
         const updatedCourse = await updateCourseConfiguration(id, userId, configData);
         return res.status(200).json(updatedCourse);
+    } catch (error: any) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+export const generateCourseUrl = async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const userId = req.user?.userId;
+        const { id } = req.params;
+
+        if (!userId) return res.status(401).json({ message: 'Non autorisé' });
+        if (!id || typeof id !== 'string') return res.status(400).json({ message: 'ID invalide' });
+
+        const token = await generateParticipationToken(id, userId);
+        return res.status(200).json({ participationUrl: token });
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
     }

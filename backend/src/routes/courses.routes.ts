@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import {createCourse, getCourseById, getCourses, updateCourseConfig} from '../controllers/course.controller.js';
+import {
+    createCourse,
+    generateCourseUrl,
+    getCourseById,
+    getCourses,
+    updateCourseConfig
+} from '../controllers/course.controller.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 
 const router = Router();
@@ -11,5 +17,6 @@ router.post('/', createCourse);
 router.get('/', getCourses);
 router.get('/:id', getCourseById);
 router.put('/:id', updateCourseConfig);
+router.post('/:id/generate-url', generateCourseUrl);
 
 export default router;

@@ -23,3 +23,9 @@ export const updateCourseConfigInDb = async (courseId: string, userId: string, c
         { new: true }              // Demande à Mongoose de renvoyer le document mis à jour
     );
 };
+
+// Ajoutez cette fonction à la fin
+export const getCourseByParticipationToken = async (token: string) => {
+    // On cherche le cours et on "populate" (jointure) l'utilisateur pour avoir son email/nom
+    return await Course.findOne({ participationUrl: token }).populate('userId', 'email');
+};

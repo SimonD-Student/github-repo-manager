@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ProjectHeader } from '../../components/project/ProjectHeader/ProjectHeader';
 import { ConfigurationCard, type ProjectConfigData } from '../../components/project/ConfigurationCard/ConfigurationCard';
 import { UrlCard } from '../../components/project/UrlCard/UrlCard';
-import {getCourseByIdAPI, updateCourseConfigAPI} from '../../api/course.api';
+import {getCourseByIdAPI, updateCourseConfigAPI, generateParticipationUrlAPI} from '../../api/course.api';
 import styles from './Project.module.css';
 
 export const Project = () => {
@@ -13,6 +13,7 @@ export const Project = () => {
     // État pour les données du cours (titre, etc.)
     const [courseInfo, setCourseInfo] = useState<{ title: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [participationToken, setParticipationToken] = useState<string>('');
 
     // État local pour le formulaire, passé à ConfigurationCard
     const [formData, setFormData] = useState<ProjectConfigData>({
@@ -29,6 +30,8 @@ export const Project = () => {
             try {
                 const data = await getCourseByIdAPI(courseId);
                 setCourseInfo(data);
+
+                setParticipationToken(data.participationUrl || '');
 
                 // Si la BDD contient déjà une config, on pré-remplit le formulaire ici :
                 setFormData({
@@ -58,13 +61,27 @@ export const Project = () => {
         }
     };
 
+    const handleGenerateUrl = async () => {
+        if (!courseId) return;
+        try {
+            const data = await generateParticipationUrlAPI(courseId);
+            setParticipationToken(data.participationUrl);
+        } catch (error) {
+            console.error("Erreur lors de la génération de l'URL", error);
+            alert("Erreur lors de la génération de l'URL");
+        }
+    };
+
     return (
         <div className={styles.pageContainer}>
             <ProjectHeader courseTitle={courseInfo?.title} isLoading={isLoading} />
 
             <div className={styles.mainContent}>
                 <ConfigurationCard data={formData} onChange={setFormData} />
-                <UrlCard />
+                <UrlCard
+                    participationToken={participationToken}
+                    onGenerate={handleGenerateUrl}
+                />
 
                 {/* Footer Actions */}
                 <div className={styles.actionFooter}>
