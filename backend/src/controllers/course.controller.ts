@@ -9,13 +9,13 @@ import {
 import type { AuthRequest } from '../middlewares/auth.middleware.js';
 import { decrypt } from '../utils/crypto.util.js';
 import {User} from "../models/user.model.js";
-import axios from "axios"; // L'interface qu'on a créée
+import { Group } from '../models/group.model.js';
+import axios from "axios";
 
 export const createCourse = async (req: AuthRequest, res: Response): Promise<any> => {
     try {
         const { title, description } = req.body;
 
-        // userId est injecté par notre middleware de sécurité
         const userId = req.user?.userId;
 
         if (!userId) {
@@ -50,7 +50,6 @@ export const getCourseById = async (req: AuthRequest, res: Response): Promise<an
 
         if (!userId) return res.status(401).json({ message: 'Non autorisé' });
 
-        // NOUVEAU : Le garde-fou pour rassurer TypeScript et sécuriser l'API
         if (!id || typeof id !== 'string') {
             return res.status(400).json({ message: 'ID du cours manquant ou invalide' });
         }
@@ -66,12 +65,11 @@ export const updateCourseConfig = async (req: AuthRequest, res: Response): Promi
     try {
         const userId = req.user?.userId;
         const { id } = req.params;
-        const configData = req.body; // Contient githubOrganization, minContributors, etc.
+        const configData = req.body;
 
         if (!userId) return res.status(401).json({ message: 'Non autorisé' });
         if (!id || typeof id !== 'string') return res.status(400).json({ message: 'ID du cours manquant ou invalide' });
 
-        // NOUVEAU : Si le prof essaie de configurer une organisation, on la valide d'abord auprès de GitHub
         if (configData.githubOrganization) {
             const user = await User.findById(userId);
             if (!user || !user.githubTokenEncrypted) {
@@ -80,7 +78,6 @@ export const updateCourseConfig = async (req: AuthRequest, res: Response): Promi
             const decryptedToken = decrypt(user.githubTokenEncrypted);
 
             try {
-                // Appel de contrôle à GitHub
                 await axios.get(`https://api.github.com/orgs/${configData.githubOrganization}`, {
                     headers: {
                         Authorization: `Bearer ${decryptedToken}`,
@@ -97,7 +94,6 @@ export const updateCourseConfig = async (req: AuthRequest, res: Response): Promi
             }
         }
 
-        // Si tout est valide, alors seulement on enregistre dans MongoDB
         const updatedCourse = await updateCourseConfiguration(id, userId, configData);
         return res.status(200).json(updatedCourse);
     } catch (error: any) {
@@ -113,20 +109,17 @@ export const generateCourseUrl = async (req: AuthRequest, res: Response): Promis
         if (!userId) return res.status(401).json({ message: 'Non autorisé' });
         if (!id || typeof id !== 'string') return res.status(400).json({ message: 'ID invalide' });
 
-        // 1. On récupère les infos du cours pour avoir le nom de l'organisation
         const course = await getCourse(id, userId);
         if (!course.githubOrganization) {
             return res.status(400).json({ message: "Veuillez d'abord configurer une organisation GitHub." });
         }
 
-        // 2. On récupère le token chiffré de l'utilisateur et on le déchiffre
         const user = await User.findById(userId);
         if (!user || !user.githubTokenEncrypted) {
             return res.status(400).json({ message: "Le token GitHub de l'administrateur est manquant." });
         }
         const decryptedToken = decrypt(user.githubTokenEncrypted);
 
-        // 3. VÉRIFICATION GITHUB : On interroge l'API GitHub
         try {
             await axios.get(`https://api.github.com/orgs/${course.githubOrganization}`, {
                 headers: {
@@ -138,7 +131,6 @@ export const generateCourseUrl = async (req: AuthRequest, res: Response): Promis
         } catch (githubError: any) {
             console.error("Erreur GitHub API détaillée:", githubError.response?.data || githubError.message);
 
-            // Si c'est un problème de token invalide (401) ou d'organisation introuvable (404)
             const status = githubError.response?.status;
             let errMsg = `L'organisation '${course.githubOrganization}' est introuvable sur GitHub.`;
             if (status === 401) {
@@ -150,11 +142,29 @@ export const generateCourseUrl = async (req: AuthRequest, res: Response): Promis
             return res.status(400).json({ message: errMsg });
         }
 
-        // 4. Si GitHub a répondu 200 OK, c'est bon, on génère l'URL !
         const token = await generateParticipationToken(id, userId);
         return res.status(200).json({ participationUrl: token });
 
     } catch (error: any) {
         return res.status(400).json({ message: error.message });
+    }
+};
+
+export const getCourseGroups = async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const userId = req.user?.userId;
+        const { id } = req.params;
+
+        if (!userId) return res.status(401).json({ message: 'Non autorisé' });
+        if (!id || typeof id !== 'string') return res.status(400).json({ message: 'ID invalide' });
+
+        const course = await getCourse(id, userId);
+        if (!course) return res.status(403).json({ message: 'Accès refusé' });
+
+        const groups = await Group.find({ courseId: id }).sort({ createdAt: 1 });
+        return res.status(200).json(groups);
+
+    } catch (error: any) {
+        return res.status(500).json({ message: error.message });
     }
 };

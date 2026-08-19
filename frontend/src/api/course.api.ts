@@ -37,22 +37,25 @@ export const updateCourseConfigAPI = async (id: string, configData: any) => {
 };
 
 export const generateParticipationUrlAPI = async (id: string) => {
-    // On utilise POST car c'est une action qui crée une nouvelle ressource (le token)
     const response = await axios.post(`${API_URL}/courses/${id}/generate-url`, {}, {
         headers: getAuthHeader()
     });
     return response.data; // Renverra { participationUrl: 'e8f7a6...' }
 };
 
-// Ajoutez ceci :
 export const getPublicCourseAPI = async (token: string) => {
-    // Attention, on ne met PAS le getAuthHeader() ici !
     const response = await axios.get(`${API_URL}/public/course/${token}`);
     return response.data;
 };
 
-// On ajoute l'appel POST public (sans header d'authentification personnel)
 export const joinCourseAPI = async (token: string, participants: any[]) => {
     const response = await axios.post(`${API_URL}/public/course/${token}/join`, { participants });
+    return response.data;
+};
+
+export const getCourseGroupsAPI = async (id: string) => {
+    const response = await axios.get(`${API_URL}/courses/${id}/groups`, {
+        headers: getAuthHeader()
+    });
     return response.data;
 };

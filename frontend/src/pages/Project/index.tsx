@@ -3,19 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ProjectHeader } from '../../components/project/ProjectHeader/ProjectHeader';
 import { ConfigurationCard, type ProjectConfigData } from '../../components/project/ConfigurationCard/ConfigurationCard';
 import { UrlCard } from '../../components/project/UrlCard/UrlCard';
-import {getCourseByIdAPI, updateCourseConfigAPI, generateParticipationUrlAPI} from '../../api/course.api';
+import {getCourseByIdAPI, updateCourseConfigAPI, generateParticipationUrlAPI, getCourseGroupsAPI} from '../../api/course.api';
+import { GroupsListCard, type GroupData } from '../../components/project/GroupsListCard/GroupsListCard';
 import styles from './Project.module.css';
 
 export const Project = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
 
-    // État pour les données du cours (titre, etc.)
     const [courseInfo, setCourseInfo] = useState<{ title: string } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [participationToken, setParticipationToken] = useState<string>('');
+    const [groups, setGroups] = useState<GroupData[]>([]);
 
-    // État local pour le formulaire, passé à ConfigurationCard
     const [formData, setFormData] = useState<ProjectConfigData>({
         githubOrganization: '',
         minContributors: 2,
@@ -23,38 +23,36 @@ export const Project = () => {
         repoNameFormat: 'Groupe{XX}'
     });
 
-    // Charger les infos du cours au démarrage pour le titre du Header
     useEffect(() => {
-        const fetchCourse = async () => {
+        const fetchCourseData = async () => {
             if (!courseId) return;
             try {
-                const data = await getCourseByIdAPI(courseId);
-                setCourseInfo(data);
+                const [courseData, groupsData] = await Promise.all([
+                    getCourseByIdAPI(courseId),
+                    getCourseGroupsAPI(courseId)
+                ]);
 
-                setParticipationToken(data.participationUrl || '');
+                setCourseInfo(courseData);
+                setParticipationToken(courseData.participationUrl || '');
+                setFormData({ /* ... */ });
 
-                // Si la BDD contient déjà une config, on pré-remplit le formulaire ici :
-                setFormData({
-                    githubOrganization: data.githubOrganization || '',
-                    minContributors: data.minContributors || 2,
-                    maxContributors: data.maxContributors || 4,
-                    repoNameFormat: data.repoNameFormat || 'Groupe{XX}'
-                });
+                // On met à jour l'état des groupes
+                setGroups(groupsData);
             } catch (error) {
-                console.error("Erreur lors de la récupération du cours", error);
+                console.error("Erreur lors de la récupération des données", error);
             } finally {
                 setIsLoading(false);
             }
-        };
+        }
 
-        fetchCourse();
+        fetchCourseData();
     }, [courseId]);
 
     const handleSave = async () => {
         if (!courseId) return;
         try {
             await updateCourseConfigAPI(courseId, formData);
-            alert("Configuration sauvegardée avec succès !"); // On met une simple alerte pour l'instant
+            alert("Configuration sauvegardée avec succès !");
         } catch (error) {
             console.error("Erreur lors de la sauvegarde", error);
             alert("Erreur lors de la sauvegarde");
@@ -82,6 +80,8 @@ export const Project = () => {
                     participationToken={participationToken}
                     onGenerate={handleGenerateUrl}
                 />
+
+                <GroupsListCard groups={groups} />
 
                 {/* Footer Actions */}
                 <div className={styles.actionFooter}>
