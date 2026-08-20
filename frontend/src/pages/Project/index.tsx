@@ -15,6 +15,7 @@ export const Project = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [participationToken, setParticipationToken] = useState<string>('');
     const [groups, setGroups] = useState<GroupData[]>([]);
+    const isLocked = Boolean(participationToken);
 
     const [formData, setFormData] = useState<ProjectConfigData>({
         githubOrganization: '',
@@ -34,9 +35,13 @@ export const Project = () => {
 
                 setCourseInfo(courseData);
                 setParticipationToken(courseData.participationUrl || '');
-                setFormData({ /* ... */ });
+                setFormData({
+                    githubOrganization: courseData.githubOrganization || '',
+                    minContributors: courseData.minContributors || 2,
+                    maxContributors: courseData.maxContributors || 4,
+                    repoNameFormat: courseData.repoNameFormat || 'Groupe{XX}'
+                });
 
-                // On met à jour l'état des groupes
                 setGroups(groupsData);
             } catch (error) {
                 console.error("Erreur lors de la récupération des données", error);
@@ -75,7 +80,8 @@ export const Project = () => {
             <ProjectHeader courseTitle={courseInfo?.title} isLoading={isLoading} />
 
             <div className={styles.mainContent}>
-                <ConfigurationCard data={formData} onChange={setFormData} />
+                <ConfigurationCard data={formData} onChange={setFormData} isLocked={isLocked} />
+
                 <UrlCard
                     participationToken={participationToken}
                     onGenerate={handleGenerateUrl}
@@ -86,16 +92,19 @@ export const Project = () => {
                 {/* Footer Actions */}
                 <div className={styles.actionFooter}>
                     <button className={styles.cancelBtn} onClick={() => navigate('/dashboard')}>
-                        Annuler
+                        Retour
                     </button>
-                    <button className={styles.saveBtn} onClick={handleSave}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px' }}>
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                            <polyline points="7 3 7 8 15 8"></polyline>
-                        </svg>
-                        Sauvegarder Configuration
-                    </button>
+
+                    {!isLocked && (
+                        <button className={styles.saveBtn} onClick={handleSave}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px' }}>
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Sauvegarder Configuration
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

@@ -5,7 +5,6 @@ const courseSchema = new mongoose.Schema({
     description: { type: String, required: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
-    // --- NOUVEAUX CHAMPS DE CONFIGURATION ---
     githubOrganization: { type: String, default: '' },
     minContributors: { type: Number, default: 2 },
     maxContributors: { type: Number, default: 4 },

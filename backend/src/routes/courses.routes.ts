@@ -5,7 +5,8 @@ import {
     getCourseById,
     getCourses,
     updateCourseConfig,
-    getCourseGroups
+    getCourseGroups,
+    updateCourseInfo
 } from '../controllers/course.controller.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 
@@ -17,6 +18,7 @@ router.post('/', createCourse);
 router.get('/', getCourses);
 router.get('/:id', getCourseById);
 router.put('/:id', updateCourseConfig);
+router.put('/:id/info', updateCourseInfo);
 router.get('/:id/groups', getCourseGroups);
 router.post('/:id/generate-url', generateCourseUrl);
 

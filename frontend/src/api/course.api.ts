@@ -59,3 +59,10 @@ export const getCourseGroupsAPI = async (id: string) => {
     });
     return response.data;
 };
+
+export const updateCourseInfoAPI = async (id: string, title: string, description: string) => {
+    const response = await axios.put(`${API_URL}/courses/${id}/info`, { title, description }, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};

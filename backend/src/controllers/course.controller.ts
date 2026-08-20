@@ -70,6 +70,14 @@ export const updateCourseConfig = async (req: AuthRequest, res: Response): Promi
         if (!userId) return res.status(401).json({ message: 'Non autorisé' });
         if (!id || typeof id !== 'string') return res.status(400).json({ message: 'ID du cours manquant ou invalide' });
 
+        const course = await getCourse(id, userId);
+
+        if (course.participationUrl) {
+            return res.status(403).json({
+                message: "Modification impossible : la configuration est verrouillée car le lien d'inscription a déjà été généré."
+            });
+        }
+
         if (configData.githubOrganization) {
             const user = await User.findById(userId);
             if (!user || !user.githubTokenEncrypted) {
@@ -166,5 +174,21 @@ export const getCourseGroups = async (req: AuthRequest, res: Response): Promise<
 
     } catch (error: any) {
         return res.status(500).json({ message: error.message });
+    }
+};
+
+export const updateCourseInfo = async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const userId = req.user?.userId;
+        const { id } = req.params;
+        const { title, description } = req.body;
+
+        if (!userId) return res.status(401).json({ message: 'Non autorisé' });
+        if (!id || typeof id !== 'string') return res.status(400).json({ message: 'ID invalide' });
+
+        const updatedCourse = await updateCourseConfiguration(id, userId, { title, description });
+        return res.status(200).json(updatedCourse);
+    } catch (error: any) {
+        return res.status(400).json({ message: error.message });
     }
 };

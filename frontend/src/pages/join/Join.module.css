@@ -209,7 +209,6 @@
     transition: background-color 0.2s;
 }
 
-/* Quand le formulaire est valide (bouton non désactivé), on le met en noir */
 .submitBtn:not(:disabled) {
     background-color: #111827;
 }
@@ -221,4 +220,31 @@
 .submitBtn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+}
+
+.participantHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.participantHeader h3 {
+    margin: 0;
+}
+
+.removeBtn {
+    background: transparent;
+    border: none;
+    color: #ef4444; /* Rouge doux */
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.removeBtn:hover {
+    background-color: #fef2f2;
 }

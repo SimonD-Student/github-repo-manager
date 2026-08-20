@@ -5,7 +5,6 @@ import { CreateCourseModal } from '../../components/dashboard/CreateCourseModal/
 import { getCoursesAPI } from '../../api/course.api';
 import styles from './Dashboard.module.css';
 
-// On définit la forme d'un cours provenant de notre backend
 interface Course {
     _id: string;
     title: string;
@@ -16,8 +15,8 @@ export const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [courses, setCourses] = useState<Course[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
-    // Fonction pour récupérer les cours
     const fetchCourses = async () => {
         setIsLoading(true);
         try {
@@ -30,10 +29,19 @@ export const Dashboard = () => {
         }
     };
 
-    // On charge les cours au premier affichage du composant
     useEffect(() => {
         fetchCourses();
     }, []);
+
+    const handleOpenCreateModal = () => {
+        setEditingCourse(null);
+        setIsModalOpen(true);
+    };
+
+    const handleOpenEditModal = (course: Course) => {
+        setEditingCourse(course);
+        setIsModalOpen(true);
+    };
 
     return (
         <div className={styles.pageContainer}>
@@ -45,7 +53,8 @@ export const Dashboard = () => {
                         <h2 className={styles.title}>Vos Cours</h2>
                         <p className={styles.subtitle}>Gérez et configurez vos cours avec création automatique de repositories</p>
                     </div>
-                    <button className={styles.newCourseBtn} onClick={() => setIsModalOpen(true)}>
+                    {/* On utilise la nouvelle fonction de création */}
+                    <button className={styles.newCourseBtn} onClick={handleOpenCreateModal}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -66,6 +75,7 @@ export const Dashboard = () => {
                                 id={course._id}
                                 title={course.title}
                                 description={course.description}
+                                onEdit={() => handleOpenEditModal(course)}
                             />
                         ))}
                     </div>
@@ -75,7 +85,9 @@ export const Dashboard = () => {
             <CreateCourseModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSuccess={fetchCourses} // La modale déclenchera ce rafraîchissement au succès
+                onSuccess={fetchCourses}
+                // On passe les données du cours à la modale
+                courseToEdit={editingCourse}
             />
         </div>
     );

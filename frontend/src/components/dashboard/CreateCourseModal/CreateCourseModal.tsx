@@ -1,20 +1,36 @@
-import { useState } from 'react';
-import { createCourseAPI } from '../../../api/course.api';
+import { useState, useEffect } from 'react';
+import { createCourseAPI, updateCourseInfoAPI } from '../../../api/course.api';
 import styles from './CreateCourseModal.module.css';
 
 interface CreateCourseModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: () => void; // Nouvelle prop pour rafraîchir la liste
+    onSuccess: () => void;
+    courseToEdit?: { _id: string; title: string; description: string } | null;
 }
 
-export const CreateCourseModal = ({ isOpen, onClose, onSuccess }: CreateCourseModalProps) => {
+export const CreateCourseModal = ({ isOpen, onClose, onSuccess, courseToEdit }: CreateCourseModalProps) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (isOpen) {
+            if (courseToEdit) {
+                setTitle(courseToEdit.title);
+                setDescription(courseToEdit.description);
+            } else {
+                setTitle('');
+                setDescription('');
+            }
+            setError(null);
+        }
+    }, [isOpen, courseToEdit]);
+
     if (!isOpen) return null;
+
+    const isEditing = !!courseToEdit;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,17 +38,16 @@ export const CreateCourseModal = ({ isOpen, onClose, onSuccess }: CreateCourseMo
         setIsLoading(true);
 
         try {
-            await createCourseAPI(title, description);
+            if (isEditing && courseToEdit) {
+                await updateCourseInfoAPI(courseToEdit._id, title, description);
+            } else {
+                await createCourseAPI(title, description);
+            }
 
-            // On vide le formulaire pour la prochaine fois
-            setTitle('');
-            setDescription('');
-
-            // On signale au Dashboard que c'est un succès et on ferme
             onSuccess();
             onClose();
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Erreur lors de la création du cours');
+            setError(err.response?.data?.message || `Erreur lors de la ${isEditing ? 'modification' : 'création'} du cours`);
         } finally {
             setIsLoading(false);
         }
@@ -42,7 +57,7 @@ export const CreateCourseModal = ({ isOpen, onClose, onSuccess }: CreateCourseMo
         <div className={styles.overlay}>
             <div className={styles.modal}>
                 <div className={styles.header}>
-                    <h2 className={styles.title}>Créer un nouveau projet</h2>
+                    <h2 className={styles.title}>{isEditing ? 'Modifier le projet' : 'Créer un nouveau projet'}</h2>
                     <button onClick={onClose} className={styles.closeBtn}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -51,7 +66,9 @@ export const CreateCourseModal = ({ isOpen, onClose, onSuccess }: CreateCourseMo
                     </button>
                 </div>
                 <p className={styles.subtitle}>
-                    Remplissez les informations pour créer un nouveau projet. Vous pourrez configurer les repositories GitHub par la suite.
+                    {isEditing
+                        ? "Modifiez le nom ou la description de ce cours."
+                        : "Remplissez les informations pour créer un nouveau projet. Vous pourrez configurer les repositories GitHub par la suite."}
                 </p>
 
                 {error && <div style={{ color: '#dc2626', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
@@ -87,7 +104,7 @@ export const CreateCourseModal = ({ isOpen, onClose, onSuccess }: CreateCourseMo
                             Annuler
                         </button>
                         <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                            {isLoading ? 'Création...' : 'Créer le cours'}
+                            {isLoading ? 'Enregistrement...' : (isEditing ? 'Sauvegarder' : 'Créer le cours')}
                         </button>
                     </div>
                 </form>
