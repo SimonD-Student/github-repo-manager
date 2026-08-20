@@ -2,6 +2,8 @@
 
 GitRepo Manager est une application SaaS conçue pour les enseignants. Elle permet de simplifier et d'automatiser la création de groupes d'étudiants et la génération de repositories GitHub au sein d'une organisation dédiée pour un cours.
 
+Lien vidéo : https://youtu.be/56gTsmIFw0o
+
 ## 📝 Informations Générales
 
 L'application est divisée en deux parties (Frontend et Backend) et permet de :
