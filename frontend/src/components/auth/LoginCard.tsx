@@ -11,7 +11,7 @@ export const LoginCard = () => {
     const [error, setError] = useState<string | null>(null);
 
     const { login } = useAuth();
-    const navigate = useNavigate(); // <-- Initialisation du hook
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,7 +22,6 @@ export const LoginCard = () => {
             const data = await loginAPI(email, password);
             login(data.token, data.user);
 
-            // <-- Redirection vers le dashboard après connexion
             navigate('/dashboard');
 
         } catch (err: any) {

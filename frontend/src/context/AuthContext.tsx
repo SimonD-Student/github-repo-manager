@@ -10,8 +10,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    // 1. Initialisation paresseuse (Lazy initialization)
-    // React va chercher dans le localStorage UNIQUEMENT au premier chargement de la page
     const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
 
     const [user, setUser] = useState<any | null>(() => {
@@ -22,7 +20,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = (newToken: string, userData: any) => {
         setToken(newToken);
         setUser(userData);
-        // 2. On sauvegarde physiquement dans le navigateur
         localStorage.setItem('token', newToken);
         localStorage.setItem('user', JSON.stringify(userData));
     };
@@ -30,7 +27,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         setToken(null);
         setUser(null);
-        // 3. On nettoie tout à la déconnexion
         localStorage.removeItem('token');
         localStorage.removeItem('user');
     };

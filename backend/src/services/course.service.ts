@@ -34,10 +34,8 @@ export const updateCourseConfiguration = async (courseId: string, userId: string
 };
 
 export const generateParticipationToken = async (courseId: string, userId: string) => {
-    // Génère 32 octets aléatoires et les convertit en chaîne hexadécimale (64 caractères)
     const token = crypto.randomBytes(32).toString('hex');
 
-    // On sauvegarde ce token dans le champ participationUrl de notre cours
     const updatedCourse = await updateCourseConfigInDb(courseId, userId, { participationUrl: token });
 
     if (!updatedCourse) {

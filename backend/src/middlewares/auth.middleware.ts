@@ -15,7 +15,6 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
     // On récupère le token
     const token = authHeader.split(' ')[1];
 
-    // NOUVEAU : On vérifie que le token existe bien pour rassurer TypeScript
     if (!token) {
         return res.status(401).json({ message: 'Token malformé.' });
     }

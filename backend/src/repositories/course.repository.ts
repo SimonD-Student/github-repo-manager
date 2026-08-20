@@ -6,26 +6,21 @@ export const createCourseInDb = async (title: string, description: string, userI
 };
 
 export const getCoursesByUserId = async (userId: string) => {
-    // On récupère les cours du prof, triés du plus récent au plus ancien
     return await Course.find({ userId }).sort({ createdAt: -1 });
 };
 
-// Récupérer un seul cours (en vérifiant que le prof en est bien le propriétaire)
 export const getCourseByIdAndUserId = async (courseId: string, userId: string) => {
     return await Course.findOne({ _id: courseId, userId });
 };
 
-// Mettre à jour la configuration d'un cours
 export const updateCourseConfigInDb = async (courseId: string, userId: string, configData: any) => {
     return await Course.findOneAndUpdate(
-        { _id: courseId, userId }, // On cherche le cours par son ID ET son propriétaire
-        { $set: configData },      // On met à jour uniquement les champs fournis
-        { new: true }              // Demande à Mongoose de renvoyer le document mis à jour
+        { _id: courseId, userId },
+        { $set: configData },
+        { new: true }
     );
 };
 
-// Ajoutez cette fonction à la fin
 export const getCourseByParticipationToken = async (token: string) => {
-    // On cherche le cours et on "populate" (jointure) l'utilisateur pour avoir son email/nom
     return await Course.findOne({ participationUrl: token }).populate('userId', 'email');
 };

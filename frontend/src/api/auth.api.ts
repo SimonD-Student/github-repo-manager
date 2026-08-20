@@ -4,13 +4,10 @@ import axios from 'axios';
 const API_URL = 'http://localhost:3000/api';
 
 export const loginAPI = async (email: string, password: string) => {
-    // Axios s'occupe de transformer nos données en JSON et de faire la requête POST
     const response = await axios.post(`${API_URL}/auth/login`, {
         email,
         password
     });
 
-    // axios place la réponse du serveur dans un objet "data"
-    // Notre backend renvoie : { message: "...", token: "...", user: { email: "..." } }
     return response.data;
 };

@@ -133,7 +133,7 @@ export const generateCourseUrl = async (req: AuthRequest, res: Response): Promis
                 headers: {
                     Authorization: `Bearer ${decryptedToken}`,
                     Accept: 'application/vnd.github.v3+json',
-                    'User-Agent': 'GitRepo-Manager-App' // <-- OBLIGATOIRE pour GitHub API depuis un serveur
+                    'User-Agent': 'GitRepo-Manager-App'
                 }
             });
         } catch (githubError: any) {

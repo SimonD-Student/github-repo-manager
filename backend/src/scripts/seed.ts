@@ -15,21 +15,20 @@ const seedAdmin = async () => {
     const githubToken = process.env.GITHUB_PAT;
 
     if (!email || !password || !githubToken) {
-        console.error('❌ Variables manquantes dans le .env');
+        console.error(' Variables manquantes dans le .env');
         process.exit(1);
     }
 
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            console.log(`⚠️ L'utilisateur existe déjà.`);
+            console.log(`L'utilisateur existe déjà.`);
             process.exit(0);
         }
 
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        // On chiffre le token GitHub avant de le sauver
         const githubTokenEncrypted = encrypt(githubToken);
 
         await User.create({
@@ -38,9 +37,9 @@ const seedAdmin = async () => {
             githubTokenEncrypted
         });
 
-        console.log(`✅ Administrateur créé avec succès avec son Token chiffré !`);
+        console.log(`Administrateur créé avec succès avec son Token chiffré !`);
     } catch (error) {
-        console.error('❌ Erreur:', error);
+        console.error('Erreur:', error);
     } finally {
         await mongoose.disconnect();
         process.exit(0);
